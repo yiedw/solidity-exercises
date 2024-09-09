@@ -17,6 +17,7 @@ contract DecoderTest is Test {
 
     function testDecodedData() public returns (string memory word, uint num) {
         (word, num) = decoder.decodeData(data);
+        console.log(word);
         assertEq(word, "hello solidity", "Decoding failed");
         assertEq(num, 2023, "Decoding failed");
     }

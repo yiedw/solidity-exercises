@@ -11,5 +11,7 @@ contract Encoder {
     function createEncodedData(
         string memory _word,
         uint256 _num
-    ) public returns (bytes memory) {}
+    ) public pure returns (bytes memory) {
+        return abi.encode(_word, _num);
+    }
 }
