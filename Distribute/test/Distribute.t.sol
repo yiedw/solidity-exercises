@@ -25,6 +25,7 @@ contract DistributeTest is Test {
         addresses[3] = address(0xBad);
 
         distribute.distributeEther(addresses);
+        console.log(addresses[0].balance);
 
         assertEq(
             addresses[0].balance,

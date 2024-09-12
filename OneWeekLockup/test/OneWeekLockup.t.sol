@@ -31,8 +31,11 @@ contract OneWeekLockupTest is Test {
 
         vm.expectRevert();
         oneWeekLockup.withdrawEther(1 ether);
+        console.log(block.timestamp);
+        console.log(oneWeekLockup.lastDepositsTime(address(this))+1 weeks);
 
         vm.warp(7 days + 1);
+        console.log(block.timestamp);
 
         vm.expectRevert();
         oneWeekLockup.withdrawEther(2 ether);
