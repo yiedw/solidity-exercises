@@ -3,6 +3,8 @@ pragma solidity ^0.8.13;
 
 contract TimelockEscrow {
     address public seller;
+    mapping(address => uint256) public buyTimes;
+    mapping(address => uint256) public buyPrices;
 
     /**
      * The goal of this exercise is to create a Time lock escrow.
@@ -14,6 +16,10 @@ contract TimelockEscrow {
         seller = msg.sender;
     }
 
+        function buyerTime(address buyer) public view returns (uint256){
+        return buyTimes[buyer];
+    }
+
     // creates a buy order between msg.sender and seller
     /**
      * escrows msg.value for 3 days which buyer can withdraw at anytime before 3 days but afterwhich only seller can withdraw
@@ -21,6 +27,8 @@ contract TimelockEscrow {
      */
     function createBuyOrder() external payable {
         // your code here
+        buyTimes[msg.sender] = block.timestamp;
+        buyPrices[msg.sender] = msg.value;
     }
 
     /**
@@ -28,6 +36,10 @@ contract TimelockEscrow {
      */
     function sellerWithdraw(address buyer) external {
         // your code here
+        require(block.timestamp > buyTimes[buyer] + 3 days,"1");
+        require(seller == msg.sender,"2");
+        seller.call{value:buyPrices[buyer]}("");
+        buyPrices[buyer] = 0;
     }
 
     /**
@@ -35,10 +47,14 @@ contract TimelockEscrow {
      */
     function buyerWithdraw() external {
         // your code here
+        require(block.timestamp <= buyTimes[msg.sender] + 3 days);
+        msg.sender.call{value:buyPrices[msg.sender]}("");
+        buyPrices[msg.sender] = 0;
+        
     }
 
     // returns the escrowed amount of @param buyer
     function buyerDeposit(address buyer) external view returns (uint256) {
-        // your code here
+     return buyPrices[buyer];   
     }
 }

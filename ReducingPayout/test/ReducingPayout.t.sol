@@ -22,7 +22,7 @@ contract ReducingPayoutTest is Test {
             : 1 ether - ((block.timestamp * 0.0011574 ether) / 100);
 
         reducingPayout.withdraw();
-
+     
         if (
             address(0xbed).balance <= amountExpected &&
             address(0xbed).balance > amountExpected - 0.000001 ether
@@ -90,6 +90,9 @@ contract ReducingPayoutTest is Test {
             ? 0
             : 1 ether - ((block.timestamp * 0.0011574 ether) / 100);
 
+        console.log(reducingPayout.getRestTime());
+        console.log(address(reducingPayout).balance);
+        console.log(address(0xbed).balance);
         reducingPayout.withdraw();
 
         if (address(0xbed).balance <= amountExpected) {

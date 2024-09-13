@@ -13,11 +13,22 @@ contract ReducingPayout {
     // The time 1 ether was sent to this contract
     uint256 public immutable depositedTime;
 
+    uint256 public restTime;
+
     constructor() payable {
         depositedTime = block.timestamp;
     }
 
     function withdraw() public {
         // your code here
+        restTime=block.timestamp-depositedTime;
+        if(restTime< 1 days){
+            msg.sender.call{value:1 ether - (1 ether/100 * 0.0011574  * restTime)}("");
+        }
+        
+    }
+
+    function getRestTime()public view returns (uint256){
+        return restTime;
     }
 }

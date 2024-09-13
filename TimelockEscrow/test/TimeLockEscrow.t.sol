@@ -8,6 +8,7 @@ contract TimelockEscrowTest is Test {
     TimelockEscrow public timelockEscrow;
     address constant SELLER = address(0x5E11E7);
 
+
     function setUp() public {
         vm.prank(SELLER);
         timelockEscrow = new TimelockEscrow();
@@ -28,7 +29,6 @@ contract TimelockEscrowTest is Test {
         vm.expectRevert();
         timelockEscrow.sellerWithdraw(address(this));
         vm.stopPrank();
-
         vm.warp(block.timestamp + 3 days + 1);
 
         uint256 timelockEscrowBalanceBefore = address(timelockEscrow).balance;
@@ -39,6 +39,9 @@ contract TimelockEscrowTest is Test {
 
         uint256 timelockEscrowBalanceAfter = address(timelockEscrow).balance;
         uint256 sellerAfter = address(SELLER).balance;
+        
+        // console.log(timelockEscrowBalanceBefore);
+        // console.log(timelockEscrowBalanceAfter);
 
         assertEq(
             timelockEscrowBalanceBefore - timelockEscrowBalanceAfter,
