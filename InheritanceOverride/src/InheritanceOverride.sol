@@ -15,6 +15,10 @@ contract InheritanceOverride is Number {
         2. `getNumber` function should return uint 10.
     */
     
+    function getNumber() public view override returns(uint256){
+        return 10;
+    }
+
     // prettier-ignore
     // your code here
 }
