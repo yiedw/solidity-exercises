@@ -17,3 +17,6 @@
 [submodule "SimpleNft/lib/openzeppelin-contracts"]
 	path = SimpleNft/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "foundry-nft/lib/forge-std"]
+	path = foundry-nft/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
