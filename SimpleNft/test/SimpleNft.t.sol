@@ -7,29 +7,26 @@ import {SimpleNft} from "../src/SimpleNft.sol";
 contract SimpleNftTest is Test {
     SimpleNft public _simpleNft;
 
-    address test=vm.addr(1);
-    address test2=vm.addr(2);
+    address test = vm.addr(1);
+    address test2 = vm.addr(2);
 
     function setUp() public {
-        _simpleNft= new SimpleNft();
+        _simpleNft = new SimpleNft();
         // simpleNft._owners=address(this);
     }
 
     function testMint() public {
-        // console.log(_simpleNft._owners(0));
-        // console.log(_simpleNft._owners(1001));
-        // console.log(address(0));
-
-        // assertEq(_simpleNft._owners(0), address(0));
-
-        vm.prank(test);
+        vm.startPrank(test);
         _simpleNft.mint(0);
-        
+        _simpleNft.mint(23);
+
         vm.expectRevert("Already minted");
         _simpleNft.mint(0);
 
         vm.expectRevert("_tokenId too Large");
         _simpleNft.mint(1001);
+
+        console.log(_simpleNft.balanceOf(test));
     }
 
     function testOwnerOf() public {
@@ -51,7 +48,6 @@ contract SimpleNftTest is Test {
 
         vm.expectRevert();
         _simpleNft.transferFrom(address(this), test2, 0);
-
     }
 
     function testTokenURI() public {
