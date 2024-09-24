@@ -26,3 +26,6 @@
 [submodule "PurchaseNftWithErc20/lib/forge-std"]
 	path = PurchaseNftWithErc20/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "PurchaseNftWithErc20/lib/openzeppelin-contracts"]
+	path = PurchaseNftWithErc20/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
