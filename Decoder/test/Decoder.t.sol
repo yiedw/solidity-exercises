@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.17;
 
@@ -15,11 +14,10 @@ contract DecoderTest is Test {
         decoder = new Decoder();
     }
 
-    function testDecodedData() public returns (string memory word, uint num) {
+    function testDecodedData() public returns (string memory word, uint256 num) {
         (word, num) = decoder.decodeData(data);
         console.log(word);
         assertEq(word, "hello solidity", "Decoding failed");
         assertEq(num, 2023, "Decoding failed");
     }
 }
-
