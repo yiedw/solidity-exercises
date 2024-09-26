@@ -38,3 +38,6 @@
 [submodule "TimeUnlockedERC20+VestingContract/lib/forge-std"]
 	path = TimeUnlockedERC20+VestingContract/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "TimeUnlockedERC20+VestingContract/lib/openzeppelin-foundry-upgrades"]
+	path = TimeUnlockedERC20+VestingContract/lib/openzeppelin-foundry-upgrades
+	url = https://github.com/OpenZeppelin/openzeppelin-foundry-upgrades
