@@ -19,6 +19,7 @@ contract SimpleNftTest is Test {
         vm.startPrank(test);
         _simpleNft.mint(0);
         _simpleNft.mint(23);
+        console.log("ASdf");
 
         vm.expectRevert("Already minted");
         _simpleNft.mint(0);
