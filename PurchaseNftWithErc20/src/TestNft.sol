@@ -8,12 +8,11 @@ contract TestNft is ERC721("Nft", "nft") {
     string private _name;
     string private _symbol;
     address private _owner;
-
     uint256 private _tokenId = 0;
 
     // USDC contract address on mainnet
     address public usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-    uint256 public tokenSupply = 0;
+    uint256 private _tokenSupply = 0;
     uint256 public constant MAX_SUPPLY = 100;
     mapping(uint256 => uint256) public balance;
 
@@ -28,7 +27,7 @@ contract TestNft is ERC721("Nft", "nft") {
     // mint for usdc
     function mint() external payable {
         // Max Supply check
-        require(tokenSupply < MAX_SUPPLY, "minting end");
+        require(_tokenSupply < MAX_SUPPLY, "minting end");
 
         // usdc balance check
         require(IERC20(usdc).balanceOf(msg.sender) >= price, "lack of usdc");
@@ -43,7 +42,7 @@ contract TestNft is ERC721("Nft", "nft") {
         _mint(msg.sender, _tokenId);
         balance[_tokenId]++;
 
-        tokenSupply++;
+        _tokenSupply++;
         _tokenId++;
     }
 
@@ -58,8 +57,8 @@ contract TestNft is ERC721("Nft", "nft") {
         require(_ok, "usdc withdraw fail");
     }
 
-    function currentTokenSupply() public view returns (uint256) {
-        return tokenSupply;
+    function current_TokenSupply() public view returns (uint256) {
+        return _tokenSupply;
     }
 
     function currentContractOwner() public view returns (address) {
