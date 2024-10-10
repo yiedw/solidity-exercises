@@ -28,9 +28,10 @@ contract DongToken is ERC20("DONG", "dong") {
     address public usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
 
     // owner or whitelist address(vesting contract)
-    function mint(address to, uint256 usdcAmount) private {
+    function mint(address to, uint256 usdcAmount) public {
         require(_owner == msg.sender || _whitelists[msg.sender], "not owner");
-        _mint(to, usdcAmount);
+        // 10 dt = 1 usdc
+        _mint(to, usdcAmount * 1e12 * 10);
     }
 
     function addWhitelist(address whitelistAddress) public {

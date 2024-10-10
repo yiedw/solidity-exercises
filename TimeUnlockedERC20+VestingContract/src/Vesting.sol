@@ -8,39 +8,42 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 // Buyers can claim the ERC20 tokens after a specific period (lockup or vesting)
 
 contract Vesting {
-    // 나중에 추가할것 : 화이트리스트
     address private _usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address private _owner;
 
     struct AmountInfo {
         uint256 totalAmount;
-        uint256 claimAmount;
+        uint256 claimedAmount;
     }
 
     struct TokenInfo {
-        uint256 tokenSupply;
-        uint256 restToken;
+        uint256 tokenAmount;
         uint256 claimToken;
         uint256 lockTimestamp;
         uint256 vestingEndTimestamp;
         uint256 purchaseEndTimestamp;
         uint256 usdcAmount;
+        uint256 tokenPrice;
         address salesOwner;
     }
 
     mapping(address => mapping(address => AmountInfo)) amountInfo;
     mapping(address => TokenInfo) tokenInfo;
 
-    constructor() {}
+    constructor() {
+        _owner = msg.sender;
+    }
 
-    function tokenPurchase(address tokenAddress, uint256 usdcAmount, uint256 rate) public {
-        uint256 purchaseAmount = usdcAmount * rate;
+    function tokenPurchase(address tokenAddress, uint256 usdcAmount) public {
+        uint256 purchaseAmount = usdcAmount * tokenInfo[tokenAddress].tokenPrice * 1e12;
 
-        // usdc check
-        require(IERC20(_usdc).balanceOf(msg.sender) >= usdcAmount, "lack of usdc");
         // restToken check
-        require(tokenInfo[tokenAddress].restToken >= purchaseAmount, "lack of restToken");
+        require(tokenInfo[tokenAddress].tokenAmount >= purchaseAmount, "lack of token");
         // usdc transferfrom
         require(IERC20(_usdc).transferFrom(msg.sender, address(this), usdcAmount), "usdc transferFrom fail");
+        // purchase time check
+        require(block.timestamp < tokenInfo[tokenAddress].purchaseEndTimestamp, "purchase time end");
+
         // token mint
         // ex) 1 dong = 10 usdc
         // (bool ok,) =
@@ -48,37 +51,45 @@ contract Vesting {
         // require(ok, "token mint fail");
 
         // AmountInfo amountInfo=AmountInfo(usdcAmount*rate,usdcAmount*rate,0,block.timestamp);
-        amountInfo[tokenAddress][msg.sender] = AmountInfo(purchaseAmount, 0);
+        amountInfo[tokenAddress][msg.sender].totalAmount += purchaseAmount;
         tokenInfo[tokenAddress].usdcAmount += usdcAmount;
-        tokenInfo[tokenAddress].restToken -= purchaseAmount;
+        tokenInfo[tokenAddress].tokenAmount -= purchaseAmount;
     }
 
     function claimToken(address tokenAddress) public {
-        // purchase time check
-        require(block.timestamp < tokenInfo[tokenAddress].purchaseEndTimestamp, "purchase time end");
         // lock check
         require(block.timestamp >= tokenInfo[tokenAddress].lockTimestamp, "not yet");
 
-        uint256 totalVestingDay = tokenInfo[tokenAddress].vestingEndTimestamp - tokenInfo[tokenAddress].lockTimestamp;
-        uint256 lastClaimDay = block.timestamp - tokenInfo[tokenAddress].lockTimestamp / 1 days;
-        uint256 restAmount = (amountInfo[tokenAddress][msg.sender].totalAmount / totalVestingDay) * lastClaimDay
-            - amountInfo[tokenAddress][msg.sender].claimAmount;
+        // uint256 totalVestingDay = tokenInfo[tokenAddress].vestingEndTimestamp - tokenInfo[tokenAddress].lockTimestamp;
+        // uint256 lastClaimDay = block.timestamp - tokenInfo[tokenAddress].lockTimestamp / 1 days;
+        uint256 claimableAmount;
+        if (block.timestamp >= tokenInfo[tokenAddress].vestingEndTimestamp) {
+            claimableAmount =
+                amountInfo[tokenAddress][msg.sender].totalAmount - amountInfo[tokenAddress][msg.sender].claimedAmount;
+        } else {
+            claimableAmount = amountInfo[tokenAddress][msg.sender].totalAmount
+                * (block.timestamp - tokenInfo[tokenAddress].lockTimestamp)
+                / (tokenInfo[tokenAddress].vestingEndTimestamp - tokenInfo[tokenAddress].lockTimestamp);
+        }
 
-        bool ok = IERC20(tokenAddress).transferFrom(address(this), msg.sender, restAmount);
-        require(ok, "token transferFrom fail");
-        amountInfo[tokenAddress][msg.sender].claimAmount += restAmount;
+        bool ok = IERC20(tokenAddress).transfer(msg.sender, claimableAmount);
+        require(ok, "token transfer fail");
+        amountInfo[tokenAddress][msg.sender].claimedAmount += claimableAmount;
     }
 
     // token deposit
     function depositToken(
         address tokenAddress,
-        uint256 tokenSupply,
+        uint256 tokenAmount,
+        uint256 tokenPrice,
         uint256 lockTimestamp,
         uint256 vestingEndTimestamp,
         uint256 purchaseEndTimestamp
     ) public {
-        IERC20(tokenAddress).transferFrom(msg.sender, address(this), tokenSupply);
-        tokenInfo[tokenAddress].tokenSupply = tokenSupply;
+        require(msg.sender == _owner, "not owner!");
+        IERC20(tokenAddress).transferFrom(msg.sender, address(this), tokenAmount);
+        tokenInfo[tokenAddress].tokenAmount = tokenAmount;
+        tokenInfo[tokenAddress].tokenPrice = tokenPrice;
         tokenInfo[tokenAddress].lockTimestamp = lockTimestamp;
         tokenInfo[tokenAddress].vestingEndTimestamp = vestingEndTimestamp;
         tokenInfo[tokenAddress].purchaseEndTimestamp = purchaseEndTimestamp;
@@ -88,8 +99,17 @@ contract Vesting {
     // usdc withdraw
     function withdrawUsdc(address tokenAddress) public {
         require(msg.sender == tokenInfo[tokenAddress].salesOwner, "not owner");
-
-        bool ok = IERC20(_usdc).transferFrom(address(this), msg.sender, tokenInfo[tokenAddress].usdcAmount);
+        bool ok = IERC20(_usdc).transfer(msg.sender, tokenInfo[tokenAddress].usdcAmount);
         require(ok, "usdc transferFrom fail");
+        tokenInfo[tokenAddress].usdcAmount = 0;
+    }
+
+    function returnUnclaimToken(address tokenAddress, address purhcaseAddress) public view returns (uint256) {
+        return
+            amountInfo[tokenAddress][purhcaseAddress].totalAmount - amountInfo[tokenAddress][msg.sender].claimedAmount;
+    }
+
+    function returnTokenAmount(address tokenAddress) public view returns (uint256) {
+        return tokenInfo[tokenAddress].tokenAmount;
     }
 }
